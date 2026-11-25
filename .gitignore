@@ -10,3 +10,4 @@
 *.apk
 !/Amin-Gateway.apk
 /dist/
+!/releases/*.apk

@@ -4,6 +4,9 @@ A one-button VPN for the 32-bit ARMv7 Xiaomi Android TV box, built on **OpenRung
 VPN engine. There is nothing to configure: no subscription link, server address, account or keyboard.
 Press the big ring with the remote's centre button and the app picks a server automatically.
 
+**[Download the experimental ARMv7 APK](releases/Amin-VPN-armv7-experimental.apk?raw=true)** (15.8 MB) ·
+[release notes and install steps](releases/RELEASE_NOTES.md) · [SHA-256](releases/Amin-VPN-armv7-experimental.apk.sha256)
+
 > **Status: experimental test build.** The engine builds and the ported unit tests pass. Connectivity
 > has **not** yet been verified on the Xiaomi box or in Iran. See [docs/AMIN_VPN.md](docs/AMIN_VPN.md).
 
