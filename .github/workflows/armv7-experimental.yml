@@ -28,10 +28,9 @@ jobs:
           go-version: '1.25.5'
           cache: false
 
-      - uses: android-actions/setup-android@v3
-
       - name: Install NDK 29 (links libbox, incl. armeabi-v7a)
-        run: sdkmanager "ndk;29.0.14206865" "platforms;android-35" "build-tools;35.0.0"
+        # The ubuntu-24.04 runner ships the Android SDK at $ANDROID_HOME.
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;29.0.14206865" "platforms;android-35" "build-tools;35.0.0" > /dev/null
 
       - name: Cache libbox.aar
         id: libbox
