@@ -22,6 +22,24 @@ jobs:
         with:
           distribution: temurin
           java-version: '17' # sing-box's build_libbox requires OpenJDK 17
+          cache: gradle
+
+      # Maven Central rate-limits (HTTP 429) shared runner IPs. Resolve through Google's official
+      # Maven Central mirror first (same artifacts and checksums); CI-only, not committed to settings.
+      - name: Gradle Maven Central mirror
+        run: |
+          mkdir -p ~/.gradle/init.d
+          cat > ~/.gradle/init.d/central-mirror.gradle <<'EOG'
+          def mirror = "https://maven-central.storage-download.googleapis.com/maven2/"
+          beforeSettings { s ->
+            s.pluginManagement.repositories.maven { url mirror }
+          }
+          settingsEvaluated { s ->
+            def repos = s.dependencyResolutionManagement.repositories
+            repos.removeIf { it instanceof MavenArtifactRepository && it.url.toString().contains("repo.maven.apache.org") }
+            repos.maven { url mirror }
+          }
+          EOG
 
       - uses: actions/setup-go@v5
         with:
