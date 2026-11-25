@@ -9,3 +9,4 @@
 *.p12
 *.apk
 !/Amin-Gateway.apk
+/dist/
