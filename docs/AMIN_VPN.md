@@ -31,7 +31,7 @@ release APK drops it only through a Gradle packaging exclude. Amin VPN keeps onl
 | Signed release APK (R8, compressed JNI) | ~15.8 MB |
 | Other native libraries in the APK | none |
 
-## Validation so far (build container, no device)
+## Build and device validation
 
 * Upstream Go tests (`punchbridge`, `TestOpenRungLibbox` with `-race`, sing-box TLS patch test): pass.
   Three telemetry-durability tests fail only when run as root, which defeats their `chmod` checks. The engine is
@@ -39,8 +39,12 @@ release APK drops it only through a Gradle packaging exclude. Amin VPN keeps onl
 * Kotlin unit tests (OpenRung host + contract vectors under Robolectric): 165/165 pass, zero skipped.
 * `aapt2`: `native-code: 'armeabi-v7a'`, leanback launcher + banner, touchscreen not required.
 
-Not yet done: no Android device, emulator (no KVM) or Iranian network path was available here.
-Nothing here claims real connectivity.
+Version 0.1.1 passed eight live checks on a Xiaomi MiTV-AFKR0 running Android 11 on 25 November
+2026. A separate Android test application verified that the default network was a VPN and performed
+fresh DNS and hostname-validated HTTPS requests over that specific network. Background use, two
+disconnect/reconnect cycles, recovery after force-stop and a final graceful disconnect passed.
+The temporary test helper was removed after the trial. See [DEVICE_TEST_REPORT.md](DEVICE_TEST_REPORT.md)
+for the exact APK hash, timings, screenshots and limits.
 
 ## Version 0.1.1 privacy and release completion
 
@@ -80,7 +84,7 @@ Success in Iran is **unconfirmed** until a tester in Tehran reports it.
 
 ## Remaining limitations
 
-* No live test yet (box, Portugal, Tehran).
+* Live testing covered the connected Xiaomi TV and its current network. Iranian network paths remain unverified.
 * OpenRung's broker/relay reachability from Iran depends on OpenRung's infrastructure, which this repository does not control.
 * The engine reports OpenRung app version `1.0.1` (from `third_party/openrung/package.json`) to the broker for
   compatibility gating. Update it together with the upstream pins.

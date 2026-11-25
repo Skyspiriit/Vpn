@@ -1,4 +1,4 @@
-**Amin VPN 0.1.1 — experimental ARMv7 release.** Device testing is in progress. Connectivity from Iran still requires an on-location test.
+**Amin VPN 0.1.1 — device-tested experimental ARMv7 release.** Eight live checks passed on a Xiaomi MiTV-AFKR0 running Android 11. Connectivity from Iran still requires an on-location test.
 
 Amin VPN is a one-button VPN for 32-bit ARMv7 Android TV boxes, using OpenRung's open-source engine (sing-box + connectcore). No configuration or account is needed.
 
@@ -12,6 +12,8 @@ Amin VPN is a one-button VPN for 32-bit ARMv7 Android TV boxes, using OpenRung's
 | Unit tests | 165/165 pass, zero skipped; native engine checks pass |
 
 Version 0.1.1 disables engine analytics, analytics geolocation, app connection counting and device metadata reporting. It fixes cancellation error handling and stale connection states after process loss. The APK is signed by the release key configured in GitHub Actions.
+
+Live checks covered DNS and HTTPS through the VPN, background operation, two disconnect/reconnect cycles, process loss, and recovery followed by a graceful disconnect. Verified connections took 8.9–13.3 seconds. [Full device report](../docs/DEVICE_TEST_REPORT.md).
 
 The release signing key differs from the earlier 0.1.0 experimental key. Remove an old 0.1.0 installation before installing 0.1.1. Future updates use the saved 0.1.1 key.
 

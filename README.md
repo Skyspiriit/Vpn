@@ -7,8 +7,11 @@ Press the big ring with the remote's centre button and the app picks a server au
 **[Download Amin VPN 0.1.1](https://github.com/Skyspiriit/Vpn/releases/download/v0.1.1-armv7-experimental/Amin-VPN.apk)** ·
 [release notes and install steps](releases/RELEASE_NOTES.md) · [SHA-256](releases/Amin-VPN-armv7-experimental.apk.sha256)
 
-> **Status: experimental test build.** The engine builds and the ported unit tests pass. Connectivity
-> has **not** yet been verified on the Xiaomi box or in Iran. See [docs/AMIN_VPN.md](docs/AMIN_VPN.md).
+> **Status: device-tested experimental release.** Version 0.1.1 passed 165 Android unit tests and eight
+> live checks on a Xiaomi MiTV-AFKR0 running Android 11, including DNS and HTTPS through the VPN,
+> background use, reconnects and recovery after process loss. Connections took 8.9–13.3 seconds on
+> the test network. Connectivity from Iran remains unverified. See the
+> [device test report](docs/DEVICE_TEST_REPORT.md) and [integration notes](docs/AMIN_VPN.md).
 
 | Colour | Meaning (Persian on screen) |
 | --- | --- |
