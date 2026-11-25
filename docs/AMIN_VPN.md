@@ -13,7 +13,7 @@ Only `bridge/`, `share/`, `MainActivity` and `MainApplication` depend on React N
 * links **one** `libbox.aar`, so there is one Go runtime and no second VPN engine. Capsule (legacy mode) runs in Check
   Point's own app and contributes no native code.
 
-Everything security-relevant stays in OpenRung code and is unchanged: signed relay-list verification
+The VPN continues to use OpenRung's signed relay-list verification
 (brokerapi), broker TLS/ECH, the punch-coordinator certificate pins (`AppConfig`), WSS ticket handling,
 installation key (Android Keystore), `cleartextTrafficPermitted=false`, routing-loop prevention (`protect()` on
 engine sockets), tunnel DNS (fresh DoH nonce probe), and the rule that the status becomes CONNECTED only after
@@ -36,7 +36,7 @@ release APK drops it only through a Gradle packaging exclude. Amin VPN keeps onl
 * Upstream Go tests (`punchbridge`, `TestOpenRungLibbox` with `-race`, sing-box TLS patch test): pass.
   Three telemetry-durability tests fail only when run as root, which defeats their `chmod` checks. The engine is
   built as an unprivileged user, as on CI, where they pass.
-* Kotlin unit tests (OpenRung host + contract vectors under Robolectric): 158/158 pass.
+* Kotlin unit tests (OpenRung host + contract vectors under Robolectric): 165/165 pass, zero skipped.
 * `aapt2`: `native-code: 'armeabi-v7a'`, leanback launcher + banner, touchscreen not required.
 
 Not yet done: no Android device, emulator (no KVM) or Iranian network path was available here.

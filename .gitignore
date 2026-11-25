@@ -9,5 +9,6 @@
 *.p12
 *.apk
 !/Amin-Gateway.apk
+!/Amin-VPN.apk
 /dist/
 !/releases/*.apk
