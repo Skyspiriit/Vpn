@@ -52,11 +52,10 @@ jobs:
 
       - name: Cache libbox.aar
         id: libbox
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: third_party/openrung/android/app/libs/libbox.aar
           key: libbox-${{ hashFiles('third_party/openrung/**') }}
-          save-always: true
 
       - name: Install gomobile (sagernet fork pinned by sing-box)
         if: steps.libbox.outputs.cache-hit != 'true'
@@ -71,6 +70,18 @@ jobs:
           export ANDROID_NDK_ROOT="$ANDROID_NDK_HOME"
           export PATH="$HOME/go/bin:$PATH"
           bash third_party/openrung/android/build-libbox-release.sh
+
+      - name: Save compiled engine
+        if: steps.libbox.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: third_party/openrung/android/app/libs/libbox.aar
+          key: libbox-${{ hashFiles('third_party/openrung/**') }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Amin-VPN-engine
+          path: third_party/openrung/android/app/libs/libbox.aar
 
       # Robolectric downloads ~200 MB Android runtime jars at test time; cache them, and retry once
       # because those downloads intermittently fail (a genuine test failure fails both times).

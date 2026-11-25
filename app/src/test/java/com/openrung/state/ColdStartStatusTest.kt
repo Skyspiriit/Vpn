@@ -16,6 +16,11 @@ class ColdStartStatusTest {
         val context = RuntimeEnvironment.getApplication()
         context.getSharedPreferences(AppConfig.STATUS_PREFS, Context.MODE_PRIVATE)
             .edit().putString("status", saved.name).commit()
+        // Robolectric reuses the Kotlin singleton; a cold Android process has no context yet.
+        OpenRungStatusStore::class.java.getDeclaredField("appContext").apply {
+            isAccessible = true
+            set(null, null)
+        }
         OpenRungStatusStore.initialize(context)
         assertEquals(expected, OpenRungStatusStore.uiState.value.status)
     }

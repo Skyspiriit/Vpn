@@ -359,9 +359,7 @@ done
       "github.com/openrung/openrung/punchcore@$punchcore_version" \
       "github.com/openrung/openrung/wsscore@$wsscore_version"
   # GOWORK=off so a developer go.work can never leak into the graft build.
-  # Build one AAR with all four React Native release ABIs: armeabi-v7a,
-  # arm64-v8a, x86, and x86_64. The previous arm64-only target was too narrow
-  # for the app's declared reactNativeArchitectures set.
+  # This application ships only ARMv7. Build the matching native slice.
   # Match upstream build_libbox: oomprofile uses runtime linknames on Linux.
   GOMODCACHE="$module_cache" GOWORK=off \
     go test -race -ldflags=-checklinkname=0 -tags with_gvisor,with_quic,with_clash_api ./experimental/libbox -run TestOpenRungLibbox
@@ -370,7 +368,7 @@ done
     go test -race -tags with_utls ./common/tls -run TestOpenRung
   GOMODCACHE="$module_cache" GOWORK=off go run ./cmd/internal/build_libbox \
     -target android \
-    -platform android
+    -platform android/arm
 )
 
 aar="$work_dir/source/libbox.aar"
@@ -401,9 +399,6 @@ required_classes = [
 ]
 required_native_libraries = [
     "jni/armeabi-v7a/libbox.so",
-    "jni/arm64-v8a/libbox.so",
-    "jni/x86/libbox.so",
-    "jni/x86_64/libbox.so",
 ]
 with zipfile.ZipFile(aar_path) as aar_file:
     aar_entries = set(aar_file.namelist())
