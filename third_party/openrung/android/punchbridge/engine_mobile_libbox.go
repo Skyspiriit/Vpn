@@ -92,6 +92,7 @@ type openRungMobileConfig struct {
 	PlatformVersion string            `json:"platform_version"`
 	Directory       string            `json:"telemetry_directory"`
 	LegacyBatch     string            `json:"legacy_telemetry_batch"`
+	TelemetryDisabled bool           `json:"telemetry_disabled"`
 	CoordinatorPins map[string]string `json:"punch_coordinator_cert_sha256_by_host"`
 }
 
@@ -133,7 +134,7 @@ func newOpenRungMobileEngine(configJSON string, platform brokerapi.Platform, pro
 		return nil, errors.New("mobile host, listener, install UUID, version and outbox directory required")
 	}
 	var legacy []clienttelemetry.Event
-	if cfg.LegacyBatch != "" {
+	if cfg.LegacyBatch != "" && !cfg.TelemetryDisabled {
 		var rows []json.RawMessage
 		if json.Unmarshal([]byte(cfg.LegacyBatch), &rows) == nil {
 			for _, row := range rows {
@@ -152,6 +153,9 @@ func newOpenRungMobileEngine(configJSON string, platform brokerapi.Platform, pro
 		filename = "outbox.json"
 	}
 	outbox, err := clienttelemetry.NewOutbox(cfg.Directory, filename, func(ctx context.Context, url string, events []clienttelemetry.Event) error {
+		if cfg.TelemetryDisabled {
+			return nil
+		}
 		dnsMu.RLock()
 		dns := append([]string(nil), dnsServers...)
 		dnsMu.RUnlock()
@@ -179,6 +183,7 @@ func newOpenRungMobileEngine(configJSON string, platform brokerapi.Platform, pro
 		runtime.statsInterval = time.Minute
 	}
 	engine := connectcore.New()
+	engine.DisableTelemetry = cfg.TelemetryDisabled
 	engine.Platform = platform
 	if protector != nil {
 		engine.SocketProtector = protected

@@ -200,6 +200,22 @@ func TestOpenRungLibboxMobileBorrowsExistingIdentityAndDurableOutbox(t *testing.
 	}
 }
 
+func TestOpenRungLibboxMobileTelemetryOptOutSkipsLegacyImport(t *testing.T) {
+	cfg := openRungMobileConfig{InstallID: "E6B1A1DE-9F0F-4C1A-8BB1-1F2B3C4D5E6F", AppVersion: "0.1.1", Directory: t.TempDir(), TelemetryDisabled: true,
+		LegacyBatch: `[{"event_id":"legacy-1","event":"connection_ended","client_id":"old-client","session_id":"old-session","timestamp":"2026-09-01T00:00:00Z"}]`}
+	raw, _ := json.Marshal(cfg)
+	engine, err := NewOpenRungMobileEngineForAndroid(string(raw), mobileTestProtector{}, mobileTestHost{}, mobileTestKey{}, mobileTestListener{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	e := engine.(*openRungEngine)
+	defer e.engine.Mobile.Outbox.Close()
+	defer e.Stop(1)
+	if !e.engine.DisableTelemetry || e.engine.Mobile.Outbox.PendingCount() != 0 {
+		t.Fatal("telemetry opt-out was not applied")
+	}
+}
+
 func TestOpenRungLibboxMobileIOSConstructorAndIdentity(t *testing.T) {
 	if iosConstructorRequiresSocketProtector() {
 		if _, err := NewOpenRungMobileEngineForIOS("{}", mobileTestHost{}, mobileTestKey{}, mobileTestListener{}); err == nil {

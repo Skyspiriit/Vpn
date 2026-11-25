@@ -54,7 +54,7 @@ object SingBoxConfiguration {
         put("tunnel_ipv6_address", "fdfe:dcba:9876::1/126")
         put("mtu", 1400)
         put("log_level", if (debug) "info" else "warn")
-        put("route_find_process", true)
+        put("route_find_process", false)
         putJsonArray("probe_domain_suffixes") {
             ProbeTargets.RULE_DOMAIN_SUFFIXES.forEach { add(it) }
         }

@@ -6,8 +6,8 @@ OpenRung's Android app is a React Native UI over a Kotlin `VpnService` host and 
 (`connectcore`, `brokerapi`, `punchcore`, `wsscore`) compiled into sing-box's gomobile `libbox.aar`.
 Only `bridge/`, `share/`, `MainActivity` and `MainApplication` depend on React Native. Amin VPN therefore:
 
-* copies the Kotlin host packages `vpn`, `net`, `state`, `model`, `telemetry` and `config` verbatim
-  (only the `R`, `BuildConfig` and `MainActivity` imports are changed), with their unit tests;
+* reuses the Kotlin VPN host and connection checks, with Amin's opt-out of analytics, app connection
+  counting, process discovery and device metadata;
 * drives the host exactly as OpenRung's RN module does: `VpnService.prepare` → consent →
   `OpenRungVpnService.connectIntent(DEFAULT_BROKER_URL)`, `disconnectIntent`, and observes `OpenRungStatusStore.uiState`;
 * links **one** `libbox.aar`, so there is one Go runtime and no second VPN engine. Capsule (legacy mode) runs in Check
@@ -41,6 +41,19 @@ release APK drops it only through a Gradle packaging exclude. Amin VPN keeps onl
 
 Not yet done: no Android device, emulator (no KVM) or Iranian network path was available here.
 Nothing here claims real connectivity.
+
+## Version 0.1.1 privacy and release completion
+
+Amin sets `telemetry_disabled=true` in the native engine configuration. The build applies
+`third_party/openrung/scripts/apply-privacy-patch.py` to the exact pinned connectcore module before
+testing and compiling it. A disabled engine creates no analytics manager, so the engine's geo lookup,
+session reporting and heartbeat uploads are skipped. Android also omits app connection counting and
+device attributes. The broker still uses an installation key for its normal relay access protocol.
+Regression checks cover the opt-out and suppression of imported analytics events.
+
+The 0.1.1 APK uses a new release signing key stored in GitHub Actions secrets with a private local
+backup outside the source repository. Updating an old 0.1.0 installation requires first removing that
+experimental installation. Later versions preserve the 0.1.1 signing identity.
 
 ## Device test plan (home network, Xiaomi box)
 

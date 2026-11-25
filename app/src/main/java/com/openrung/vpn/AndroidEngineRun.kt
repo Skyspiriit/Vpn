@@ -2,9 +2,7 @@ package com.openrung.vpn
 
 import android.net.*
 import android.os.ParcelFileDescriptor
-import android.os.SystemClock
 import com.openrung.net.*
-import com.openrung.telemetry.RunApplicationConnections
 import io.nekohasekai.libbox.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.*
@@ -14,7 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /** A native TUN owner created once per Go runtime attempt; never rebound to a successor. */
 internal class AndroidEngineRun(
     private val service: OpenRungVpnService,
-    private val telemetry: OpenRungRunTelemetry,
+    @Suppress("UNUSED_PARAMETER") telemetry: OpenRungRunTelemetry,
     private val retired: (AndroidEngineRun) -> Unit,
 ) : OpenRungMobileRun {
     private val cm = service.getSystemService(ConnectivityManager::class.java)
@@ -23,16 +21,13 @@ internal class AndroidEngineRun(
     private var fd: ParcelFileDescriptor? = null
     @Volatile private var interfaceName = ""
     @Volatile private var network: Network? = null
-    private val counts = RunApplicationConnections(service.packageName, SystemClock::elapsedRealtime) { name, uid, count ->
-        telemetry.recordApplicationConnections(name, uid, count)
-    }
     private val platform = OpenRungLibboxPlatform(service, { descriptor, name ->
         synchronized(lock) {
             check(!closed.get()) { "TUN owner is closed" }
             check(fd == null) { "TUN owner already has a descriptor" }
             fd = descriptor; interfaceName = name
         }
-    }, counts::record)
+    }, { _, _, _ -> })
     override fun platform(): PlatformInterface = platform
     fun refreshInterfaces() = platform.refreshInterfaces()
 
@@ -94,7 +89,6 @@ internal class AndroidEngineRun(
     override fun close() {
         synchronized(lock) {
             if (!closed.compareAndSet(false, true)) return
-            counts.close()
             fd?.close(); fd = null; network = null
         }
         retired(this)

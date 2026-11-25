@@ -75,6 +75,23 @@ if [ -z "$connectcore_version" ]; then
   exit 1
 fi
 
+# Build the pinned module with Amin's committed opt-out. The same source is used
+# for the native binding tests and the packaged engine.
+if [ -z "${CONNECTCORE_SRC:-}" ]; then
+  pinned_connectcore="$(go mod download -json "github.com/openrung/openrung/connectcore@$connectcore_version" | python3 -c 'import json,sys; print(json.load(sys.stdin)["Dir"])')"
+else
+  pinned_connectcore="$CONNECTCORE_SRC"
+fi
+cp -R "$pinned_connectcore" "$work_dir/connectcore"
+chmod -R u+w "$work_dir/connectcore"
+python3 "$repo_root/scripts/apply-privacy-patch.py" "$work_dir/connectcore"
+gofmt -w "$work_dir/connectcore/engine.go" "$work_dir/connectcore/helpers.go" "$work_dir/connectcore/amin_privacy_test.go"
+CONNECTCORE_SRC="$work_dir/connectcore"
+(
+  cd "$CONNECTCORE_SRC"
+  GOWORK=off go test ./... -run TestAminTelemetryDisabledCreatesNoReporter
+)
+
 dev_workspace=""
 if [ -n "${PUNCHCORE_SRC:-}" ] || [ -n "${WSSCORE_SRC:-}" ] || [ -n "${BROKERAPI_SRC:-}" ] || [ -n "${CONNECTCORE_SRC:-}" ]; then
   # Dev mode resolves any shared module from a local checkout. Tests and
@@ -322,8 +339,7 @@ done
     if [ -n "${CONNECTCORE_SRC:-}" ]; then
       echo "CONNECTCORE_SRC: $CONNECTCORE_SRC" >&2
     fi
-    echo "This is for development only. Release AARs must resolve" >&2
-    echo "all versions pinned in android/punchbridge/go.mod." >&2
+    echo "Amin's committed privacy patch is applied to the pinned connectcore module." >&2
     echo "==============================================================" >&2
   fi
 

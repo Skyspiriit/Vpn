@@ -4,7 +4,7 @@ A one-button VPN for the 32-bit ARMv7 Xiaomi Android TV box, built on **OpenRung
 VPN engine. There is nothing to configure: no subscription link, server address, account or keyboard.
 Press the big ring with the remote's centre button and the app picks a server automatically.
 
-**[Download the experimental ARMv7 APK](releases/Amin-VPN-armv7-experimental.apk?raw=true)** (15.8 MB) ·
+**[Download Amin VPN 0.1.1](https://github.com/Skyspiriit/Vpn/releases/download/v0.1.1-armv7-experimental/Amin-VPN.apk)** ·
 [release notes and install steps](releases/RELEASE_NOTES.md) · [SHA-256](releases/Amin-VPN-armv7-experimental.apk.sha256)
 
 > **Status: experimental test build.** The engine builds and the ported unit tests pass. Connectivity
@@ -23,9 +23,9 @@ status, server location, connection time, network, ABI, memory and redacted engi
 
 ## How it works
 
-* `app/src/main/java/com/openrung/**` is OpenRung's native Android VPN host (`VpnService`, connectcore
-  process host, libbox platform, broker/WSS transport, DNS/HTTPS path probes), copied unchanged
-  apart from the `R`/`BuildConfig`/`MainActivity` imports. OpenRung's React Native UI and bridge are **not** used.
+* `app/src/main/java/com/openrung/**` supplies the Android VPN host, broker transport and tunnel checks.
+  Amin disables app connection counting, process discovery, device metadata and engine telemetry.
+  Its committed connectcore privacy patch prevents analytics sessions and IP geolocation requests.
 * `app/src/main/kotlin/com/enigma/amingateway/` is the Galactic UI (`GatewayConsole`, `GalacticPanel`), the
   new `MainActivity` (Amin VPN), `Diagnostics`, and the preserved legacy Capsule code (`LegacyCapsuleActivity`,
   `GatewayConnection`, `CapsuleClient`, `UniversityProbe`).
@@ -34,6 +34,10 @@ status, server location, connection time, network, ABI, memory and redacted engi
   `UPSTREAM_COMMIT`. The script builds **one** `libbox.aar` (one Go runtime) with an `armeabi-v7a` slice.
 
 Application ID: `com.enigma.aminvpn` (installs beside, never over, the old `com.enigma.amingateway`).
+
+Version 0.1.1 uses a new release signing key configured for GitHub Actions. An installation of the
+earlier experimental 0.1.0 APK requires removal before installing 0.1.1 because its signing key differs.
+Future releases use the saved 0.1.1 signing key.
 
 ## Build
 

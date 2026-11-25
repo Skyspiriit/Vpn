@@ -2,6 +2,7 @@ package com.openrung.net
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
@@ -47,7 +48,8 @@ class SingBoxConfigurationBindingInputTest {
         val scenarios = SingBoxBindingFixtures.scenarios("android").filterNot { it.endsWith("bridge") }
         assertTrue("no android scenarios found; the fixture directory changed shape", scenarios.size >= 5)
         scenarios.forEach { scenario ->
-            val expected = JsonObject(SingBoxBindingFixtures.input(scenario) - "relay")
+            val expected = JsonObject((SingBoxBindingFixtures.input(scenario) - "relay") +
+                ("route_find_process" to JsonPrimitive(false)))
             assertEquals(scenario, expected, settings(rulesFor(scenario)))
         }
     }

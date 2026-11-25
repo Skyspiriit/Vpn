@@ -6,7 +6,7 @@ name: Amin VPN ARMv7 experimental build
 on:
   workflow_dispatch:
   push:
-    branches: [amin-vpn-openrung-armv7]
+    branches: [amin-vpn-openrung-armv7, main]
     tags: ['v*-experimental*']
 
 permissions:
@@ -81,6 +81,13 @@ jobs:
 
       - name: Unit tests
         run: ./gradlew --no-daemon :app:testDebugUnitTest || ./gradlew --no-daemon :app:testDebugUnitTest
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Amin-VPN-test-results
+          path: app/build/test-results/testDebugUnitTest/
+          if-no-files-found: ignore
 
       - name: Decode signing key
         id: key

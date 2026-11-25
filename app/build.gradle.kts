@@ -24,8 +24,8 @@ android {
         applicationId = "com.enigma.aminvpn"
         minSdk = 26 // OpenRung's VPN host contract minimum (Android 8.0).
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.1.0-armv7-experimental"
+        versionCode = 3
+        versionName = "0.1.1-armv7-experimental"
         // Ship 32-bit ARM only: the target is the 32-bit ARMv7 Xiaomi TV box. 64-bit ARM devices
         // with 32-bit userspace support can still run it.
         ndk { abiFilters += listOf("armeabi-v7a") }

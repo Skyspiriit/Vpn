@@ -22,7 +22,6 @@ import io.nekohasekai.libbox.SetupOptions
 import kotlinx.serialization.json.*
 import java.io.File
 import java.util.Locale
-import java.util.TimeZone
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
@@ -152,17 +151,15 @@ internal open class EngineProcessHost(
             debug = BuildConfig.DEBUG; crashReportSource = "OpenRungAndroid"
             oomKillerEnabled = false; oomKillerDisabled = true
         })
-        val prefs = service.getSharedPreferences("openrung_telemetry", 0)
-        val legacy = prefs.getString("outbox", null)
         val config = buildJsonObject {
             put("install_id", ClientIdentity.getOrCreate(service.applicationContext))
             put("app_version", BuildConfig.VERSION_NAME)
             put("platform_version", Build.VERSION.SDK_INT.toString())
             put("telemetry_directory", service.filesDir.absolutePath)
+            put("telemetry_disabled", true)
             put("punch_coordinator_cert_sha256_by_host", buildJsonObject {
                 AppConfig.PUNCH_COORDINATOR_CERT_SHA256_BY_HOST.forEach { (host, pin) -> put(host, pin) }
             })
-            legacy?.let { put("legacy_telemetry_batch", it) }
         }
         val key = InstallationKey.androidKeystore()
         val result = Libbox.newOpenRungMobileEngineForAndroid(config.toString(), object : OpenRungWSSProtector {
@@ -171,9 +168,6 @@ internal open class EngineProcessHost(
             override fun publicKey(): ByteArray = key.publicKey()
             override fun sign(digest: ByteArray): ByteArray = key.sign(digest)
         }, events)
-        // Constructor success proves every importable legacy row was persisted;
-        // corrupt rows keep the shipping outbox's discard behavior.
-        if (legacy != null) prefs.edit().remove("outbox").commit()
         return result
     }
 
@@ -183,12 +177,7 @@ internal open class EngineProcessHost(
         return service.settingsJSON()
     }
 
-    override fun attributesJSON(): String = buildJsonObject {
-        put("os_name", "android"); put("android_api", Build.VERSION.SDK_INT.toString())
-        put("device_manufacturer", Build.MANUFACTURER); put("device_model", Build.MODEL)
-        put("locale", Locale.getDefault().toLanguageTag()); put("timezone", TimeZone.getDefault().id)
-        owner?.networkAttributes()?.forEach { (key, value) -> put(key, value) }
-    }.toString()
+    override fun attributesJSON(): String = "{}"
 
     override fun newRun(telemetry: OpenRungRunTelemetry): OpenRungMobileRun =
         checkNotNull(owner) { "No active VPN owner" }.newRun(telemetry)
