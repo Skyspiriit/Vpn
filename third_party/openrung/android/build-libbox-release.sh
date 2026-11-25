@@ -89,7 +89,11 @@ gofmt -w "$work_dir/connectcore/engine.go" "$work_dir/connectcore/helpers.go" "$
 CONNECTCORE_SRC="$work_dir/connectcore"
 (
   cd "$CONNECTCORE_SRC"
-  GOWORK=off go test ./... -run TestAminTelemetryDisabledCreatesNoReporter
+  GOWORK=off go mod edit \
+    -dropreplace github.com/openrung/openrung/brokerapi \
+    -dropreplace github.com/openrung/openrung/punchcore \
+    -dropreplace github.com/openrung/openrung/wsscore
+  GOWORK=off go test -mod=mod ./... -run TestAminTelemetryDisabledCreatesNoReporter
 )
 
 dev_workspace=""
