@@ -144,9 +144,10 @@ class EngineProcessHostTest {
         val service = Robolectric.buildService(OpenRungVpnService::class.java).create().get()
         val settings = Json.parseToJsonElement(service.settingsJSON()).jsonObject
         val original = SingBoxBindingFixtures.input("android-tun")
-        for (key in listOf("mtu", "tunnel_ipv4_address", "tunnel_ipv6_address", "probe_domain_suffixes", "route_find_process")) {
+        for (key in listOf("mtu", "tunnel_ipv4_address", "tunnel_ipv6_address", "probe_domain_suffixes")) {
             assertEquals(key, original[key], settings[key])
         }
+        assertEquals(false, settings["route_find_process"]!!.jsonPrimitive.boolean)
         assertFalse(settings.containsKey("relay"))
         SplitTunnelStore.writeAndReportEffectiveChange(service,
             """{"version":1,"enabled":true,"bypass_lan":true,"bypass_countries":[],"country_source":"manual","excluded_packages":[]}""")

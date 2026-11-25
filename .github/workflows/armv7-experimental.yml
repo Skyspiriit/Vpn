@@ -56,6 +56,7 @@ jobs:
         with:
           path: third_party/openrung/android/app/libs/libbox.aar
           key: libbox-${{ hashFiles('third_party/openrung/**') }}
+          save-always: true
 
       - name: Install gomobile (sagernet fork pinned by sing-box)
         if: steps.libbox.outputs.cache-hit != 'true'

@@ -35,7 +35,7 @@ object OpenRungStatusStore {
             ConnectionStatus.valueOf(prefs.getString(KEY_STATUS, ConnectionStatus.DISCONNECTED.name)!!)
         }.getOrDefault(ConnectionStatus.DISCONNECTED)
         state.value = OpenRungUiState(
-            status = if (restoredStatus == ConnectionStatus.CONNECTED) ConnectionStatus.DISCONNECTED else restoredStatus,
+            status = if (restoredStatus == ConnectionStatus.FAILED) ConnectionStatus.FAILED else ConnectionStatus.DISCONNECTED,
             // A cold start always reconnects fresh, so never restore stale relay details.
             relayLabel = null,
             relayName = null,
