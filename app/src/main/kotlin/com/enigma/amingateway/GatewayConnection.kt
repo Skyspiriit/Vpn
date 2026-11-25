@@ -14,13 +14,17 @@ import android.util.Log
 import java.security.SecureRandom
 import java.util.concurrent.Executors
 
-internal enum class Phase { OFF, CONNECTING, ON, DISCONNECTING, ATTENTION }
+internal enum class Phase { OFF, CONNECTING, ON, DISCONNECTING, ATTENTION, FAILED }
 
 internal data class ConsoleState(
     val phase: Phase,
     val status: String,
     val detail: String = "",
-    val canDisconnect: Boolean = false
+    val canDisconnect: Boolean = false,
+    /** Overrides the legacy English button label (Amin VPN uses Persian). */
+    val label: String? = null,
+    /** Overrides the legacy rule that disables the button while busy (Amin VPN allows cancel). */
+    val enabled: Boolean? = null,
 )
 
 internal enum class NextStep { NONE, INSTALL, EXISTING_VPN, RECOVERY, MANUAL }

@@ -61,7 +61,7 @@ class CapsuleReturnActivity : Activity() {
             uri.pathSegments.size == 2 && uri.pathSegments.first() == "result" &&
             (application as GatewayApplication).vpn.acknowledge(uri.pathSegments.last())
         ) {
-            startActivity(Intent(this, MainActivity::class.java).addFlags(
+            startActivity(Intent(this, LegacyCapsuleActivity::class.java).addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             ))
         }

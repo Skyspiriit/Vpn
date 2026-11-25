@@ -17,18 +17,34 @@ import android.widget.TextView
 import kotlin.math.min
 import kotlin.math.roundToInt
 
+/**
+ * Screen options. The defaults reproduce the original Amin Gateway (legacy Capsule) screen exactly;
+ * Amin VPN passes Persian text, a larger type scale for TV viewing distance and a secondary button.
+ */
+internal data class ConsoleOptions(
+    val title: Int = R.string.gateway_title,
+    val signoff: Int = R.string.gateway_signoff,
+    val scale: Float = 1f,
+    val secondaryLabel: Int? = null,
+    val onSecondary: (() -> Unit)? = null,
+)
+
 @SuppressLint("ViewConstructor") // The activity creates and wires this view directly.
-internal class GatewayConsole(context: Context, onPower: () -> Unit) : ViewGroup(context) {
+internal class GatewayConsole(
+    context: Context,
+    private val options: ConsoleOptions = ConsoleOptions(),
+    onPower: () -> Unit,
+) : ViewGroup(context) {
     private val density = resources.displayMetrics.density
     private val art = GalacticPanel(context)
     private val title = text(29f, 0xffe2f5fd.toInt()).apply {
         typeface = Typeface.create("sans-serif-condensed", Typeface.BOLD)
         letterSpacing = 0.22f
-        setText(R.string.gateway_title)
+        setText(options.title)
         if (Build.VERSION.SDK_INT >= 28) isAccessibilityHeading = true
     }
     private val power = Button(context).apply {
-        textSize = 13f
+        textSize = 13f * options.scale
         letterSpacing = 0.13f
         typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
         includeFontPadding = false
@@ -48,15 +64,36 @@ internal class GatewayConsole(context: Context, onPower: () -> Unit) : ViewGroup
         minimumWidth = 0
         minimumHeight = 0
         setOnClickListener { onPower() }
+        // D-pad / remote control: the big button is the default focus and shows a bright ring.
+        isFocusable = true
+        setOnFocusChangeListener { _, focused -> art.focused = focused }
     }
-    private val status = text(19f, 0xffd3e7ee.toInt()).apply {
+    private val status = text(19f * options.scale, 0xffd3e7ee.toInt()).apply {
         typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
         accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE
     }
-    private val detail = text(13f, 0xffa9bfcb.toInt()).apply { visibility = GONE }
-    private val footer = text(13f, 0xff9ab3c4.toInt()).apply {
+    private val detail = text(13f * options.scale, 0xffa9bfcb.toInt()).apply { visibility = GONE }
+    private val footer = text(13f * (1f + (options.scale - 1f) / 2f), 0xff9ab3c4.toInt()).apply {
         typeface = Typeface.create("serif", Typeface.ITALIC)
-        setText(R.string.gateway_signoff)
+        setText(options.signoff)
+    }
+    private val secondary: Button? = options.secondaryLabel?.let { label ->
+        Button(context).apply {
+            setText(label)
+            textSize = 12f * options.scale
+            setAllCaps(false)
+            stateListAnimator = null
+            setTextColor(ColorStateList(arrayOf(intArrayOf(android.R.attr.state_focused), intArrayOf()),
+                intArrayOf(0xff04121c.toInt(), 0xffcfe6ef.toInt())))
+            background = android.graphics.drawable.StateListDrawable().apply {
+                addState(intArrayOf(android.R.attr.state_focused), pill(0xffbff9f3.toInt(), 0xffbff9f3.toInt()))
+                addState(intArrayOf(android.R.attr.state_pressed), pill(0x4081ffff, 0xff8dfff2.toInt()))
+                addState(intArrayOf(), pill(0x1881ffff, 0x80568fa3.toInt()))
+            }
+            setPadding(dp(22), dp(8), dp(22), dp(8))
+            isFocusable = true
+            setOnClickListener { options.onSecondary?.invoke() }
+        }
     }
 
     private var leftInset = 0
@@ -78,6 +115,13 @@ internal class GatewayConsole(context: Context, onPower: () -> Unit) : ViewGroup
         addView(status)
         addView(detail)
         addView(footer)
+        secondary?.let { button ->
+            addView(button)
+            power.id = generateViewId()
+            button.id = generateViewId()
+            power.nextFocusDownId = button.id
+            button.nextFocusUpId = power.id
+        }
         setOnApplyWindowInsetsListener { _, insets ->
             if (Build.VERSION.SDK_INT >= 30) {
                 val safe = insets.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout())
@@ -100,9 +144,11 @@ internal class GatewayConsole(context: Context, onPower: () -> Unit) : ViewGroup
         }
     }
 
+    fun focusPower() = power.requestFocus()
+
     fun render(state: ConsoleState) {
         art.phase = state.phase
-        val label = when {
+        val label = state.label ?: when {
             state.phase == Phase.CONNECTING -> "CONNECTING"
             state.phase == Phase.DISCONNECTING -> "DISCONNECTING"
             state.canDisconnect -> "DISCONNECT FROM\nTHE GALAXY"
@@ -110,10 +156,20 @@ internal class GatewayConsole(context: Context, onPower: () -> Unit) : ViewGroup
         }
         power.text = label
         power.contentDescription = label.replace('\n', ' ')
-        power.isEnabled = state.phase != Phase.CONNECTING && state.phase != Phase.DISCONNECTING
-        power.setTextColor(if (state.phase == Phase.ON) 0xffbefff6.toInt() else 0xffd5f2fb.toInt())
+        power.isEnabled = state.enabled ?: (state.phase != Phase.CONNECTING && state.phase != Phase.DISCONNECTING)
+        power.setTextColor(when (state.phase) {
+            Phase.ON -> 0xffbefff6.toInt()
+            Phase.CONNECTING -> 0xffffe9a8.toInt()
+            Phase.FAILED -> 0xffffc9c4.toInt()
+            else -> 0xffd5f2fb.toInt()
+        })
         status.text = state.status
-        status.setTextColor(if (state.phase == Phase.ON) 0xff9affed.toInt() else 0xffd3e7ee.toInt())
+        status.setTextColor(when (state.phase) {
+            Phase.ON -> 0xff9affed.toInt()
+            Phase.CONNECTING -> 0xffffd866.toInt()
+            Phase.FAILED -> 0xffff8f86.toInt()
+            else -> 0xffd3e7ee.toInt()
+        })
         detail.text = state.detail
         detail.visibility = if (state.detail.isEmpty()) GONE else VISIBLE
     }
@@ -130,12 +186,14 @@ internal class GatewayConsole(context: Context, onPower: () -> Unit) : ViewGroup
         status.measure(wrapWidth, wrapHeight)
         if (detail.visibility == VISIBLE) detail.measure(wrapWidth, wrapHeight)
         footer.measure(wrapWidth, wrapHeight)
+        secondary?.measure(wrapWidth, wrapHeight)
+        val secondaryRoom = secondary?.let { it.measuredHeight + dp(if (compact) 8 else 14) } ?: 0
 
         centerX = leftInset + safeWidth / 2f
         titleY = topInset + (safeHeight * 0.112f).coerceIn(dp(12).toFloat(), dp(92).toFloat()) + title.measuredHeight / 2f
         bottomY = height - bottomInset - dp(if (compact) 16 else 27) - footer.measuredHeight / 2f
         val maxAbove = titleY + title.measuredHeight / 2f + dp(if (compact) 16 else 34)
-        val maxBelow = bottomY - footer.measuredHeight / 2f - dp(15)
+        val maxBelow = bottomY - footer.measuredHeight / 2f - dp(15) - secondaryRoom
         statusGap = dp(if (compact) 6 else 10)
         val statusBlock = status.measuredHeight + if (detail.visibility == VISIBLE) detail.measuredHeight + statusGap else 0
         val statusMargin = dp(if (compact) 10 else 19)
@@ -160,6 +218,13 @@ internal class GatewayConsole(context: Context, onPower: () -> Unit) : ViewGroup
         if (detail.visibility == VISIBLE) centered(detail,
             statusY + status.measuredHeight + statusGap + detail.measuredHeight / 2f)
         centered(footer, bottomY)
+        secondary?.let { centered(it, bottomY - footer.measuredHeight / 2f - dp(10) - it.measuredHeight / 2f) }
+    }
+
+    private fun pill(fill: Int, stroke: Int) = GradientDrawable().apply {
+        cornerRadius = dp(40).toFloat()
+        setColor(fill)
+        setStroke(dp(1), stroke)
     }
 
     private fun centered(view: View, y: Float) {

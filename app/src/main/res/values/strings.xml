@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Amin VPN screen: Persian on every device locale (users are Persian speakers). -->
+    <string name="vpn_app_name">Amin VPN</string>
+    <string name="vpn_title">AMIN VPN</string>
+    <string name="vpn_signoff">اینترنت آزاد، با یک دکمه</string>
+
+    <string name="vpn_button_connect">اتصال</string>
+    <string name="vpn_button_cancel">در حال اتصال…\n(لغو)</string>
+    <string name="vpn_button_disconnect">قطع اتصال</string>
+    <string name="vpn_button_disconnecting">در حال قطع…</string>
+    <string name="vpn_button_retry">تلاش دوباره</string>
+    <string name="vpn_diagnostics">عیب‌یابی</string>
+
+    <string name="vpn_state_off">اتصال قطع است</string>
+    <string name="vpn_state_off_detail">برای اتصال، دکمهٔ وسط کنترل را فشار دهید</string>
+    <string name="vpn_state_permission">لطفاً در پنجرهٔ اندروید «تأیید» را بزنید</string>
+    <string name="vpn_state_permission_denied">اجازهٔ VPN داده نشد. دوباره دکمه را بزنید و «تأیید» را انتخاب کنید.</string>
+    <string name="vpn_state_preparing">در حال آماده‌سازی… لطفاً صبر کنید</string>
+    <string name="vpn_state_connecting">در حال اتصال… لطفاً صبر کنید</string>
+    <string name="vpn_state_connecting_detail">بهترین سرور به‌طور خودکار انتخاب می‌شود</string>
+    <string name="vpn_state_on">متصل است ✓</string>
+    <string name="vpn_state_on_detail">اینترنت امن برقرار و آزمایش شد · %1$s</string>
+    <string name="vpn_state_disconnecting">در حال قطع اتصال…</string>
+    <string name="vpn_state_failed">اتصال برقرار نشد</string>
+    <string name="vpn_state_failed_detail">چند لحظه صبر کنید و دوباره دکمه را بزنید</string>
+    <string name="vpn_error_clock">ساعت و تاریخ دستگاه نادرست است. در تنظیمات اندروید آن را درست کنید.</string>
+    <string name="vpn_error_access">دسترسی به سرویس موقتاً ممکن نیست. بعداً دوباره امتحان کنید.</string>
+    <string name="vpn_error_offline">دستگاه به اینترنت وصل نیست. وای‌فای یا کابل شبکه را بررسی کنید.</string>
+    <string name="vpn_error_start">VPN شروع نشد. دوباره امتحان کنید.</string>
+
+    <string name="diag_title">عیب‌یابی اتصال</string>
+    <string name="diag_close">بستن</string>
+    <string name="diag_reconnect">اتصال دوباره</string>
+    <string name="diag_legacy">حالت قدیمی دانشگاه (Capsule)</string>
+    <string name="diag_legacy_busy">ابتدا امین VPN را قطع کنید، سپس حالت دانشگاه را باز کنید.</string>
+
+    <!-- Strings consumed by the OpenRung native VPN host (com.openrung.*). English default, Persian in values-fa. -->
+    <string name="vpn_notification_channel">Amin VPN</string>
+    <string name="vpn_notification_title">Amin VPN</string>
+    <string name="vpn_notification_preparing">Preparing Amin VPN</string>
+    <string name="vpn_notification_connected">Connected through %1$s</string>
+    <string name="relay_location_unknown">Unknown location</string>
+    <string name="status_disconnected">Disconnected</string>
+    <string name="status_preparing">Preparing VPN</string>
+    <string name="status_connecting">Connecting</string>
+    <string name="status_connected">Connected</string>
+    <string name="status_disconnecting">Disconnecting</string>
+    <string name="status_failed">Failed</string>
+    <string name="log_split_ruleset_missing">split tunneling rule set for %1$s is missing; keeping that traffic in the tunnel</string>
+    <string name="log_error_prefix">error: %1$s</string>
+</resources>

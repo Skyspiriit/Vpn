@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_channel">Amin VPN</string>
+    <string name="vpn_notification_title">Amin VPN</string>
+    <string name="vpn_notification_preparing">در حال آماده‌سازی امین VPN</string>
+    <string name="vpn_notification_connected">متصل از طریق %1$s</string>
+    <string name="relay_location_unknown">موقعیت نامشخص</string>
+    <string name="status_disconnected">قطع شده</string>
+    <string name="status_preparing">در حال آماده‌سازی VPN</string>
+    <string name="status_connecting">در حال اتصال</string>
+    <string name="status_connected">متصل</string>
+    <string name="status_disconnecting">در حال قطع اتصال</string>
+    <string name="status_failed">ناموفق</string>
+</resources>

@@ -5,3 +5,7 @@
 **/build/
 *.jks
 *.keystore
+/third_party/openrung/android/app/libs/
+*.p12
+*.apk
+!/Amin-Gateway.apk

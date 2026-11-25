@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Amin Gateway"
+rootProject.name = "Amin VPN"
 include(":app")

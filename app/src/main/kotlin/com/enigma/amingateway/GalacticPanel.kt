@@ -43,6 +43,7 @@ internal class GalacticPanel(context: Context) : View(context) {
     private var liveFace: Shader? = null
     private var halo: Shader? = null
     private var scanning: Shader? = null
+    private var amberScan: Shader? = null
     private var edge: Shader? = null
 
     var phase = Phase.OFF
@@ -53,6 +54,14 @@ internal class GalacticPanel(context: Context) : View(context) {
             invalidate()
         }
     private var changedAt = startTime
+
+    /** True while the central button has D-pad focus: draws a bright selection ring. */
+    var focused = false
+        set(value) {
+            if (field == value) return
+            field = value
+            invalidate()
+        }
 
     init {
         importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
@@ -78,6 +87,9 @@ internal class GalacticPanel(context: Context) : View(context) {
             scanning = SweepGradient(x, y,
                 intArrayOf(0x003afaef, 0x003afaef, 0x183afaef, 0xcc8bfff5.toInt(), 0x003afaef),
                 floatArrayOf(0f, 0.64f, 0.79f, 0.965f, 1f))
+            amberScan = SweepGradient(x, y,
+                intArrayOf(0x00ffc93a, 0x00ffc93a, 0x22ffc93a, 0xeeffe27a.toInt(), 0x00ffc93a),
+                floatArrayOf(0f, 0.6f, 0.77f, 0.965f, 1f))
             edge = LinearGradient(x - r, y - r, x + r, y + r,
                 intArrayOf(0xff62bfcc.toInt(), 0xff285369.toInt(), 0xff1c3f55.toInt(), 0xff3a8395.toInt()), null, Shader.TileMode.CLAMP)
         }
@@ -98,6 +110,8 @@ internal class GalacticPanel(context: Context) : View(context) {
         val phaseSeconds = if (motion) (now - changedAt) / 1000f else 1f
         val on = phase == Phase.ON
         val active = phase == Phase.CONNECTING || phase == Phase.DISCONNECTING
+        val connecting = phase == Phase.CONNECTING
+        val failed = phase == Phase.FAILED
         val power = if (on) (phaseSeconds / 0.72f).coerceIn(0f, 1f) else 0f
         val wave = (0.5f + 0.5f * sin(phaseSeconds * 1.7f))
 
@@ -124,6 +138,10 @@ internal class GalacticPanel(context: Context) : View(context) {
         canvas.drawCircle(x, y, r, paint)
         if (on) {
             circle(canvas, r, 2.2f, 0xff8dfff2.toInt())
+        } else if (failed) {
+            circle(canvas, r, 2.6f, 0xffff5f56.toInt())
+        } else if (connecting) {
+            circle(canvas, r, 2.2f, (((150 + wave * 105).toInt()) shl 24) or 0xffc93a)
         } else {
             shaded(edge, stroke = 1.35f)
             canvas.drawCircle(x, y, r, paint)
@@ -133,12 +151,20 @@ internal class GalacticPanel(context: Context) : View(context) {
         val faceY = y - r * 0.16f
         val glyph = r * 0.25f
         if (on) drawPower(canvas, faceY, glyph, 10f, 0x2e4cffff)
-        drawPower(canvas, faceY, glyph, if (on) 3.9f else 3f, if (on) 0xffb6fff6.toInt() else 0xff71b5c7.toInt())
+        val glyphTint = when {
+            on -> 0xffb6fff6.toInt()
+            connecting -> 0xffffd866.toInt()
+            failed -> 0xffff7d74.toInt()
+            phase == Phase.OFF -> 0xff9aa7b0.toInt() // grey: disconnected
+            else -> 0xff71b5c7.toInt()
+        }
+        drawPower(canvas, faceY, glyph, if (on) 3.9f else 3f, glyphTint)
+        if (focused) circle(canvas, r * 1.075f, 3.2f, 0xeef4fbff.toInt())
 
         if (active) {
             canvas.save()
             canvas.rotate(phaseSeconds * 86f, x, y)
-            shaded(scanning, stroke = 2.5f)
+            shaded(if (connecting) amberScan else scanning, stroke = if (connecting) 3.2f else 2.5f)
             canvas.drawCircle(x, y, r * 1.12f, paint)
             canvas.restore()
         }
@@ -151,7 +177,12 @@ internal class GalacticPanel(context: Context) : View(context) {
                     if (i % 2 == 0) dp * 1.75f else dp * 1.1f, paint)
             }
         }
-        if ((on || active) && motion && windowVisibility == VISIBLE && isShown) postInvalidateDelayed(32)
+        if ((on || active) && motion && windowVisibility == VISIBLE && isShown) postInvalidateDelayed(FRAME_MS)
+    }
+
+    private companion object {
+        // ~24 fps: smooth enough for the slow rings, light on a low-end TV box GPU/CPU.
+        const val FRAME_MS = 42L
     }
 
     private fun drawFrame(canvas: Canvas) {
